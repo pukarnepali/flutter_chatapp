@@ -1,3 +1,4 @@
+import 'package:chatapp/pages/chat_screen.dart';
 import 'package:chatapp/services/auth/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,7 +28,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home Page'),
+        title: Text('Home Page', style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: Colors.blue,
         actions: [
           // sign out
           IconButton(onPressed: signOut, icon: const Icon(Icons.logout)),
@@ -38,11 +41,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // build a list of users except for the current logged in user
-  Widget _buildUserList(DocumentSnapshot document) {
+  Widget _buildUserList() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('users').snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.hasError) {}
+        if (snapshot.hasError) {
+          return const Text('error');
+        }
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Text('Loading..');
         }
@@ -62,15 +67,23 @@ class _HomeScreenState extends State<HomeScreen> {
     // display all users except current user
     if (_auth.currentUser!.email != data['email']) {
       return ListTile(
-        title: data['email'],
+        title: Text(data['email']),
         onTap: () {
           // pass the clicked user's Uid to the chat page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => chatPage()),
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                receiverUserEmail: data['email'],
+                receiverUserID: data['uid'],
+              ),
+            ),
           );
         },
       );
+    } else {
+      // return empty container
+      return Container();
     }
   }
 }
