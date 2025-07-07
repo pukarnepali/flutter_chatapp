@@ -1,4 +1,5 @@
 import 'package:chatapp/chat/chat_services.dart';
+import 'package:chatapp/components/chat_bubble.dart';
 import 'package:chatapp/components/my_text_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -54,6 +55,8 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(child: _buildMessageList()),
           // user input
           _buildMessageInput(),
+
+          const SizedBox(height: 25),
         ],
       ),
     );
@@ -94,8 +97,23 @@ class _ChatScreenState extends State<ChatScreen> {
 
     return Container(
       alignment: alignment,
-      child: Column(
-        children: [Text(data['senderEmail']), Text(data['message'])],
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment:
+              (data['senderId'] == _firebaseAuth.currentUser!.uid)
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
+          mainAxisAlignment:
+              (data['senderId'] == _firebaseAuth.currentUser!.uid)
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
+          children: [
+            Text(data['senderEmail']),
+            SizedBox(height: 5),
+            ChatBubble(message: data['message']),
+          ],
+        ),
       ),
     );
   }
@@ -103,23 +121,26 @@ class _ChatScreenState extends State<ChatScreen> {
   // build message input
 
   Widget _buildMessageInput() {
-    return Row(
-      children: [
-        // textField
-        Expanded(
-          child: MyTextField(
-            controller: _messageController,
-            hintText: "Enter message",
-            obscureText: false,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25),
+      child: Row(
+        children: [
+          // textField
+          Expanded(
+            child: MyTextField(
+              controller: _messageController,
+              hintText: "Enter message",
+              obscureText: false,
+            ),
           ),
-        ),
 
-        // send button
-        IconButton(
-          onPressed: sendMessage,
-          icon: const Icon(Icons.arrow_upward, size: 40),
-        ),
-      ],
+          // send button
+          IconButton(
+            onPressed: sendMessage,
+            icon: const Icon(Icons.arrow_upward, size: 40),
+          ),
+        ],
+      ),
     );
   }
 }
